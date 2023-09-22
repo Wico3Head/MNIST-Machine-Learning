@@ -15,7 +15,8 @@ class Network:
 
     def activate(self, inputs):
         for layer in range(self.size - 1):
-            inputs = sigmoidActivate(np.dot(self.weights[layer], inputs) + self.bias[layer])
+            inputs = np.dot(self.weights[layer], inputs) + self.bias[layer]
+            inputs = sigmoidActivate(inputs)
         return inputs
     
     def learn(self, training_data, learn_rate, lmbda, train_set_size):
