@@ -1,8 +1,9 @@
 import numpy as np
+import cv2 as cv
+from setting import *
 
-mat = np.array([[1, 2, 3, 4],
-             [5, 6, 7, 8],
-             [9, 10, 11, 12],
-             [13, 14, 15, 16]])
-
-print(mat[1:3][0][1:3])
+pic = np.zeros((20, 20), dtype=np.uint8)
+pic[1:9, 1:9] = 1
+img = cv.cvtColor(pic, cv.COLOR_GRAY2BGR)
+cv.imshow('img', img)
+cv.waitKey()

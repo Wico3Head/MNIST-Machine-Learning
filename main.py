@@ -1,4 +1,4 @@
-import gzip, pickle, pygame, cv2, sys
+import pickle, pygame, sys
 import numpy as np    
 from network import Network
 from canvas import Canvas
@@ -29,6 +29,10 @@ def main():
                 if drawing:
                     drawing = False
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    canvas = Canvas(screen)
+
         if drawing:
             mouse = pygame.mouse.get_pos()
             if not canvas.onCanvas(mouse):
@@ -38,8 +42,13 @@ def main():
 
         screen.fill(BG_COLOR)
         canvas.draw()
-        output = net.activate(canvas.low_rest_image.flatten())
-        #print(drawing)
+        output = net.activate(canvas.low_res_image.flatten() / 255)
+        decision = output.tolist().index(max(output))
+
+        output_label = FONT.render(f"output: {decision}", False, 'white')
+        output_rect = output_label.get_rect(topleft=(750, 500))
+        screen.blit(output_label, output_rect)
+
         pygame.display.update()
 
 if __name__ == "__main__":
