@@ -18,7 +18,7 @@ class Network:
             inputs = sigmoidActivate(np.dot(self.weights[layer], inputs) + self.bias[layer])
         return inputs
     
-    def learn(self, training_data, learn_rate, lmbda):
+    def learn(self, training_data, learn_rate, lmbda, train_set_size):
         weight_alterations = [np.zeros(weight_matrix.shape) for weight_matrix in self.weights]
         bias_alterations = [np.zeros(bias_matrix.shape) for bias_matrix in self.bias]
         training_data_size = len(training_data)
@@ -30,11 +30,11 @@ class Network:
             inputs_history = [inputs]
             current_layer_inputs = inputs
             for layer in range(self.size - 1):
-                current_layer_output = np.dot(self.weights[layer], current_layer_inputs) + self.bias[layer]
-                inputs_history.append(current_layer_output)
-                current_layer_inputs = sigmoidActivate(current_layer_output)
+                current_layer_inputs = np.dot(self.weights[layer], current_layer_inputs) + self.bias[layer]
+                inputs_history.append(current_layer_inputs)
+                current_layer_inputs = sigmoidActivate(current_layer_inputs)
 
-            current_layer_cost_node_gradient = np.array(2 * (current_layer_inputs - expected_output))
+            current_layer_cost_node_gradient = np.array(current_layer_inputs - expected_output)
             for layer in range(self.size - 1):
                 bias_alterations[-(layer + 1)] -= current_layer_cost_node_gradient
                 weight_alterations[-(layer + 1)] -= np.dot(current_layer_cost_node_gradient.reshape((self.structure[-(layer+1)], 1)), inputs_history[-(layer + 2)].reshape((1, self.structure[-(layer+2)])))
@@ -43,6 +43,6 @@ class Network:
         for layer in range(self.size - 1):
             weight_alterations[layer] *= learn_rate / training_data_size
             bias_alterations[layer] *= learn_rate / training_data_size
-            self.weights[layer] *= 1 - lmbda * learn_rate / training_data_size 
+            self.weights[layer] *= 1 - (lmbda * learn_rate / train_set_size)
             self.weights[layer] += weight_alterations[layer]
             self.bias[layer] += bias_alterations[layer]

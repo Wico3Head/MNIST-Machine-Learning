@@ -1,53 +1,40 @@
-import pygame, sys, time, math
-from network import Network
+import gzip, pickle, pygame, cv2, sys
 import numpy as np
-pygame.init()
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt     
+from network import Network
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 800
-LEARN_RATE = 0.5
-REGULARISATION_CONSTANT = 2
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('Machine Learning Demo')
-
-def testInput(input):
-    result = 1 if input[0] < input[1] else 0
-    return np.array([1 - result, result])
+LEARN_RATE = 0.35
+REGULARISATION_CONSTANT = 10
 
 def main():
-    net = Network([2, 3, 2])
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+    with gzip.open('mnist.pkl.gz', 'rb') as f:
+        train_set, valid_set, test_set = pickle.load(f, encoding='latin1')
 
-        training_data = []
-        for i in range(300):
-            x = np.random.rand()
-            y = np.random.rand()
-            inputs = [x, y]
-            testInputs = [x * 100, y * 100]
-            training_data.append(np.array([inputs, testInput(testInputs)]))
-        net.learn(training_data, LEARN_RATE, REGULARISATION_CONSTANT)
+    net = Network([784, 100, 10])
+    train_img, train_ans = train_set[0], train_set[1]
+    train_set_size = len(train_img)
+    epoch_data = []
+    for idx in range(train_set_size):
+        img = train_img[idx]
+        expected_output = np.array([0 if train_ans[idx] != i else 1 for i in range(10)])
+        epoch_data.append([img, expected_output])
+        if len(epoch_data) == 50:
+            net.learn(epoch_data, LEARN_RATE, REGULARISATION_CONSTANT, train_set_size)
+            epoch_data.clear()
+    if epoch_data:
+        net.learn(epoch_data, LEARN_RATE, REGULARISATION_CONSTANT, train_set_size)
 
-        screen.fill('white')
-        for x in range(100):
-            for y in range(100):
-                outputs = net.activate(np.array([x/100, y/100]))
-                if outputs[0] > outputs[1]:
-                    pygame.draw.rect(screen, 'black', pygame.Rect(x * 8, y * 8, 8, 8))
-
-        pygame.display.update()
-
-def main2():
-    net = Network([1, 1])
-    net.weights[0][0] = -5
-    net.bias[0][0] = 0
-    while True:  
-        print(net.activate([1]))
-        net.learn(np.array([[[1], [0]]]), 1.5)      
-        time.sleep(0.1)
+    test_img, test_ans = test_set[0], test_set[1]
+    test_set_size = len(test_set[0])
+    correct = 0
+    for idx in range(test_set_size):    
+        outputs = net.activate(test_img[idx].flatten())
+        decision = outputs.tolist().index(max(outputs))
+        if decision == test_ans[idx]:
+            correct += 1
+            
+    print(correct/len(test_ans)*100)
 
 if __name__ == "__main__":
     main()
-    
