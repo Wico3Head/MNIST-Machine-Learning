@@ -307,6 +307,7 @@ def main():
                 new_data.append((np.array(canvas.low_res_image.flatten() / 255, dtype=np.float32), add_label))
                 add_label = None
                 adding = False
+                canvas = Canvas(screen)
 
         pygame.display.update()
 
