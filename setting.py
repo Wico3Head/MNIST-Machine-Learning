@@ -15,4 +15,3 @@ FONT = pygame.font.Font(os.path.join(LOCAL_DIR, 'Font/pixel.ttf'), 50)
 SMALL_FONT = pygame.font.Font(os.path.join(LOCAL_DIR, 'Font/pixel.ttf'), 40)
 
 PEN_RADIUS = 25
-PEN_STROKE = np.full((2 * PEN_RADIUS, 2 * PEN_RADIUS), 255)
